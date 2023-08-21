@@ -1,0 +1,32 @@
+name: Terraform IaC Pipeline
+
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  validate-terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Validate Terraform code
+        run: |
+          terraform fmt -check -recursive
+          tflint --error-with-issues
+
+      - name: Scan Terraform code
+        run: tfsec .
+
+      # - name: Apply Terraform changes
+      #   run: terraform apply -auto-approve
+      #   env:
+      #     TF_VAR_variable_name: ${{ secrets.TF_VAR_variable_name }}
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/feature/*'
+
